@@ -88,6 +88,42 @@ You can also pipe content:
 cat path-to-file.pdf | markitdown
 ```
 
+### `convert_drive_to_md.py` — local batch helper (repository root)
+
+This repository includes a small script at the root, `convert_drive_to_md.py`, for converting **local** files to Markdown in one step. It wraps the same `MarkItDown` API as the CLI, but adds batching: multiple inputs, a single output directory, optional `--file` (paths list), optional `--prefix`, and safe `.md` naming when files collide.
+
+**Install** (from the repo root, with the `markitdown` package available — see [Installation](#installation)):
+
+```bash
+pip install -r requirements.txt
+# or, for editable library install from this repo:
+# pip install -e 'packages/markitdown[all]'
+```
+
+**Examples:**
+
+```bash
+python convert_drive_to_md.py --output MyProject report.docx notes.pdf
+python convert_drive_to_md.py --output MyProject --file paths.txt   # one path per line; # comments OK
+```
+
+**Google Docs / Drive:** The script does **not** download from Google. Export from the browser first (e.g. **File → Download → Microsoft Word (.docx)**), then point the script at the saved file. Earlier experiments with automated Drive download (e.g. cookie- or URL-based tools) were removed because they were brittle for private docs and often returned HTML instead of real Office files.
+
+#### Possible next steps: Drive automation
+
+To automate downloads **without** browser cookies, the supported route is **Google Drive API v3** with **OAuth 2.0** (user consent) or a **service account** (workspace / server scenarios with admin setup):
+
+1. Create a project in [Google Cloud Console](https://console.cloud.google.com/), enable **Google Drive API**, and configure the **OAuth consent screen**.
+2. Add credentials (OAuth client ID for a desktop or web app, or a service account where appropriate).
+3. Use the official client libraries, for example:
+   - [`google-api-python-client`](https://pypi.org/project/google-api-python-client/) — Drive API resources (`files`, `files.export`, `files.get` with `alt=media`).
+   - [`google-auth-oauthlib`](https://pypi.org/project/google-auth-oauthlib/) — user OAuth flow and token storage.
+   - [`google-auth-httplib2`](https://pypi.org/project/google-auth-httplib2/) — transport for the discovery-based client.
+4. Request minimal OAuth scopes (e.g. `https://www.googleapis.com/auth/drive.readonly` for read-only).
+5. For **Google Docs** stored as native Docs (not uploaded `.docx`), use **`files.export`** to `application/vnd.openxmlformats-officedocument.wordprocessingml.document` (or export PDF), save to a temp path, then run `MarkItDown` on that path — same as this script’s conversion step.
+
+A future optional extension could add a `--oauth` / `--credentials` mode that performs export + conversion; it is intentionally out of scope for the minimal helper script today.
+
 ### Optional Dependencies
 MarkItDown has optional dependencies for activating various file formats. Earlier in this document, we installed all optional dependencies with the `[all]` option. However, you can also install them individually for more control. For example:
 

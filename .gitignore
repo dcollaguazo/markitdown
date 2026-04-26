@@ -129,6 +129,8 @@ celerybeat.pid
 .venv
 env/
 venv/
+# Project-specific: convert_drive_to_md + local markitdown
+venv-markitdown/
 ENV/
 env.bak/
 venv.bak/
@@ -166,3 +168,10 @@ cython_debug/
 src/.DS_Store
 .DS_Store
 .cursorrules
+
+# Google auth cookies — never commit these
+cookies.txt
+**/cookies.txt
+
+# Local output from convert_drive_to_md.py --output examples
+/MyProject/
